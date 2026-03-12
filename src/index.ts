@@ -1,4 +1,5 @@
 import "dotenv/config";
+import fastifyApiReference from "@scalar/fastify-api-reference";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import {
@@ -9,7 +10,6 @@ import {
 } from "fastify-type-provider-zod";
 import z from "zod";
 import Fastify from "fastify";
-import { url } from "inspector";
 import { auth } from "./lib/auth.js";
 import fastifyCors from "@fastify/cors";
 
@@ -37,14 +37,39 @@ await app.register(fastifySwagger, {
   transform: jsonSchemaTransform,
 });
 
-await app.register(fastifySwaggerUI, {
-  routePrefix: "/docs",
+await app.register(fastifyCors, {
+  origin: "http://localhost:3000", //! Substitua pelo domínio do seu frontend
+  credentials: true,
 });
 
-await app.register(fastifyCors, {
-    origin: "http://localhost:3000", //! Substitua pelo domínio do seu frontend
-    credentials: true
-})
+await app.register(fastifyApiReference, {
+  routePrefix: "/docs",
+  configuration: {
+    sources: [
+      {
+        title: "Órion API",
+        slug: "orion-api",
+        url: "/swagger.json",
+      },
+      {
+        title: "Auth API",
+        slug: "auth-api",
+        url: "/api/auth/open-api/generate-schema",
+      },
+    ],
+  },
+});
+
+app.withTypeProvider<ZodTypeProvider>().route({
+  method: "GET",
+  url: "/swagger.json",
+  schema: {
+    hide: true,
+  },
+  handler: async () => {
+    return app.swagger();
+  },
+});
 
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
@@ -93,10 +118,10 @@ app.route({
       app.log.error(error);
       reply.status(500).send({
         error: "Internal authentication error",
-        code: "AUTH_FAILURE"
+        code: "AUTH_FAILURE",
       });
     }
-  }
+  },
 });
 
 try {
