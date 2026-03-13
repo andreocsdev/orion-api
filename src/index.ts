@@ -1,7 +1,6 @@
 import "dotenv/config";
 import fastifyApiReference from "@scalar/fastify-api-reference";
 import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUI from "@fastify/swagger-ui";
 import {
   jsonSchemaTransform,
   serializerCompiler,
@@ -12,6 +11,15 @@ import z from "zod";
 import Fastify from "fastify";
 import { auth } from "./lib/auth.js";
 import fastifyCors from "@fastify/cors";
+import { CreateGroup } from "./usecases/CreateGroup.js";
+import { CreateEvent } from "./usecases/CreateEvent.js";
+import { AddUserToGroup } from "./usecases/AddUserToGroup.js";
+import { GetOrCreateDailyCheck } from "./usecases/GetOrCreateDailyCheck.js";
+import { UpdateDailyChecks } from "./usecases/UpdateDailyChecks.js";
+import { GetDailyChecksHistory } from "./usecases/GetDailyChecksHistory.js";
+import { manageGroupsRoutes } from "./routes/manage-groups.js";
+import { manageDailyCheckRoutes } from "./routes/manage-daily-check.js";
+import { manageEventsRoutes } from "./routes/manage-events.js";
 
 const app = Fastify({
   logger: true,
@@ -60,6 +68,12 @@ await app.register(fastifyApiReference, {
   },
 });
 
+//Routes
+await app.register(manageEventsRoutes);
+await app.register(manageGroupsRoutes);
+await app.register(manageDailyCheckRoutes);
+
+
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
   url: "/swagger.json",
@@ -68,24 +82,6 @@ app.withTypeProvider<ZodTypeProvider>().route({
   },
   handler: async () => {
     return app.swagger();
-  },
-});
-
-app.withTypeProvider<ZodTypeProvider>().route({
-  method: "GET",
-  url: "/",
-  schema: {
-    description: "Rota de teste para verificar se a API está funcionando",
-    tags: ["Bíblia e Lição"],
-    response: {
-      200: z.object({
-        bible: z.string(),
-        lesson: z.string(),
-      }),
-    },
-  },
-  handler: () => {
-    return { bible: "checked", lesson: "checked" };
   },
 });
 
