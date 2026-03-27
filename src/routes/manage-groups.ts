@@ -5,8 +5,48 @@ import { AddUserToGroup } from "../usecases/AddUserToGroup.js";
 import { FastifyInstance } from "fastify";
 import { ErrorSchema } from "../schema/index.js";
 import { requireRole } from "../lib/route-guards.js";
+import { GetGroups } from "../usecases/GetGroups.js";
 
 export const manageGroupsRoutes = async (app: FastifyInstance) => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: "GET",
+    url: "/groups",
+    preHandler: [requireRole(["ADMIN"])],
+    schema: {
+      tags: ["Groups"],
+      summary: "List groups",
+      response: {
+        200: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            users: z.array(
+              z.object({
+                id: z.string(),
+                name: z.string(),
+                email: z.string(),
+              }),
+            ),
+            eventos: z.array(
+              z.object({
+                id: z.string(),
+                name: z.string(),
+              }),
+            ),
+          }),
+        ),
+        401: ErrorSchema,
+        403: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (_request, reply) => {
+      const getGroups = new GetGroups();
+      const result = await getGroups.execute();
+      return reply.status(200).send(result);
+    },
+  });
+
   app.withTypeProvider<ZodTypeProvider>().route({
     method: "POST",
     url: "/create-group",

@@ -7,19 +7,13 @@ import {
   validatorCompiler,
   ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import z from "zod";
 import Fastify from "fastify";
 import { auth } from "./lib/auth.js";
 import fastifyCors from "@fastify/cors";
-import { CreateGroup } from "./usecases/CreateGroup.js";
-import { CreateEvent } from "./usecases/CreateEvent.js";
-import { AddUserToGroup } from "./usecases/AddUserToGroup.js";
-import { GetOrCreateDailyCheck } from "./usecases/GetOrCreateDailyCheck.js";
-import { UpdateDailyChecks } from "./usecases/UpdateDailyChecks.js";
-import { GetDailyChecksHistory } from "./usecases/GetDailyChecksHistory.js";
 import { manageGroupsRoutes } from "./routes/manage-groups.js";
 import { manageDailyCheckRoutes } from "./routes/manage-daily-check.js";
 import { manageEventsRoutes } from "./routes/manage-events.js";
+import { manageUsersRoutes } from "./routes/manage-users.js";
 
 const app = Fastify({
   logger: true,
@@ -38,7 +32,7 @@ await app.register(fastifySwagger, {
     servers: [
       {
         description: "Localhost",
-        url: "http://localhost:3000",
+        url: "http://localhost:8080",
       },
     ],
   },
@@ -46,8 +40,10 @@ await app.register(fastifySwagger, {
 });
 
 await app.register(fastifyCors, {
-  origin: "http://localhost:3000", //! Substitua pelo domínio do seu frontend
+  origin: ["http://localhost:3000", "http://192.168.15.160:3000"], //! Substitua pelo domínio do seu frontend
   credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 });
 
 await app.register(fastifyApiReference, {
@@ -72,7 +68,7 @@ await app.register(fastifyApiReference, {
 await app.register(manageEventsRoutes);
 await app.register(manageGroupsRoutes);
 await app.register(manageDailyCheckRoutes);
-
+await app.register(manageUsersRoutes);
 
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
@@ -121,7 +117,7 @@ app.route({
 });
 
 try {
-  await app.listen({ port: Number(process.env.PORT) || 3000 });
+  await app.listen({ port: Number(process.env.PORT) || 8080 });
 } catch (err) {
   app.log.error(err);
   process.exit(1);
