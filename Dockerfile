@@ -20,7 +20,6 @@ FROM deps AS build
 
 COPY . .
 
-RUN pnpm prisma generate
 RUN pnpm run build && cp -r src/generated dist/generated
 
 # ------- Production -------
