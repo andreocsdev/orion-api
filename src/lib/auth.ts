@@ -2,16 +2,17 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { openAPI } from "better-auth/plugins";
 import { prisma } from "./db.js";
+import { env } from "./env.js";
 
 export const auth = betterAuth({
-  trustedOrigins: ["http://localhost:3000"], //! Substitua pelo domínio do seu frontend
-  baseURL: process.env.BETTER_AUTH_URL,
+  trustedOrigins: [env.WEB_APP_BASE_URL], //! Substitua pelo domínio do seu frontend
+  baseURL: env.API_BASE_URL,
   emailAndPassword: { enabled: true },
   socialProviders: {
     google: {
       prompt: "select_account",
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     },
   },
   database: prismaAdapter(prisma, { provider: "postgresql" }),

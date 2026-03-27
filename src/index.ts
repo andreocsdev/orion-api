@@ -14,6 +14,7 @@ import { manageGroupsRoutes } from "./routes/manage-groups.js";
 import { manageDailyCheckRoutes } from "./routes/manage-daily-check.js";
 import { manageEventsRoutes } from "./routes/manage-events.js";
 import { manageUsersRoutes } from "./routes/manage-users.js";
+import { env } from "./lib/env.js";
 
 const app = Fastify({
   logger: true,
@@ -31,8 +32,8 @@ await app.register(fastifySwagger, {
     },
     servers: [
       {
-        description: "Localhost",
-        url: "http://localhost:8080",
+        description: "API Base URL",
+        url: env.API_BASE_URL,
       },
     ],
   },
@@ -40,7 +41,7 @@ await app.register(fastifySwagger, {
 });
 
 await app.register(fastifyCors, {
-  origin: ["http://localhost:3000", "http://192.168.15.160:3000"], //! Substitua pelo domínio do seu frontend
+  origin: [env.WEB_APP_BASE_URL], //! Substitua pelo domínio do seu frontend
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -117,7 +118,7 @@ app.route({
 });
 
 try {
-  await app.listen({ port: Number(process.env.PORT) || 8080 });
+  await app.listen({ port: Number(env.PORT) || 8080 });
 } catch (err) {
   app.log.error(err);
   process.exit(1);
