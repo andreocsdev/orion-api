@@ -17,4 +17,11 @@ export const auth = betterAuth({
   },
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   plugins: [openAPI()],
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true,
+      // domain:
+      //   env.NODE_ENV === "production" ? ".fullstackclub.com.br" : undefined,
+    },
+  },
 });
