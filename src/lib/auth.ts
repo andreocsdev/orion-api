@@ -4,6 +4,9 @@ import { openAPI } from "better-auth/plugins";
 import { prisma } from "./db.js";
 import { env } from "./env.js";
 
+console.log("trustedOrigins:", [env.WEB_APP_BASE_URL, "https://orion.aosc.com.br"]);
+console.log("baseURL:", env.API_BASE_URL);
+
 export const auth = betterAuth({
   trustedOrigins: [env.WEB_APP_BASE_URL], //! Substitua pelo domínio do seu frontend
   baseURL: env.API_BASE_URL,
